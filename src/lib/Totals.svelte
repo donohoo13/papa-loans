@@ -59,9 +59,4 @@
       color: #f00;
     }
   }
-
-  h3 > span {
-    font-size: 0.75em;
-    font-style: italic;
-  }
 </style>
