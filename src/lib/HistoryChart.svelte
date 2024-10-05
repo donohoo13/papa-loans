@@ -2,7 +2,6 @@
   import { dailyBalance } from "./history";
   import { Line } from "svelte-chartjs";
   import "chart.js/auto";
-  console.log(`dailyBalance :>>`, dailyBalance);
 </script>
 
 <section id="history-chart" aria-details="history totals chart">
