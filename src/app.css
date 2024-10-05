@@ -3,6 +3,10 @@
   --clr-bg-primary: #1a1a1a;
   --clr-brand-primary: #646cff;
   --clr-brand-secondary: #535bf2;
+  --bkpt-mobile: 600px;
+  --bkpt-tablet: 900px;
+  --bkpt-laptop: 1200px;
+  --bkpt-desktop: 1800px;
 
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

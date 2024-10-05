@@ -3,6 +3,7 @@
   import History from "./lib/History.svelte";
   import Totals from "./lib/Totals.svelte";
   import PapaLoans from "./assets/papa_loans_t.webp";
+  import HistoryChart from "./lib/HistoryChart.svelte";
 
   let currentDateTime = dayjs().format("MMMM D, YYYY h:mm:ss A");
 
@@ -25,6 +26,8 @@
   <Totals />
 
   <History />
+
+  <HistoryChart />
 </main>
 
 <style>

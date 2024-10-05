@@ -15,22 +15,29 @@ export const history = [
 export let totalInterestAccrued = new Decimal(0);
 export let totalRepayments = new Decimal(0);
 export let currentBalance = new Decimal(FIRST_LOAN_AMOUNT);
+export let dailyBalance: {
+  balance: Decimal;
+  interestAdded: Decimal;
+  date: dayjs.Dayjs;
+}[] = [{
+    balance: currentBalance,
+    interestAdded: new Decimal(0),
+    date: history[0].date,
+}];
 
+const today = dayjs();
+let startDate = history[0].date.add(1, "day"); // Interest starts accruing the day after the first loan
+while (startDate.isBefore(today)) {
+  const dailyInterest = currentBalance.times(INTEREST_RATE).dividedBy(365);
+  totalInterestAccrued = totalInterestAccrued.plus(dailyInterest);
+  currentBalance = currentBalance.plus(dailyInterest);
 
-let startDate = history[0].date.add(2, "month").startOf("month");
-while (startDate.isBefore(dayjs())) {
-  const monthlyInterest = currentBalance.times(INTEREST_RATE).dividedBy(12);
-  totalInterestAccrued = totalInterestAccrued.plus(monthlyInterest);
-  currentBalance = currentBalance.plus(monthlyInterest);
-
-  const monthsActivity = history.filter(
-    (payment) =>
-      payment.date.isSame(startDate, "month") &&
-      payment.date.isSame(startDate, "year")
+  const daysActivity = history.filter((payment) =>
+    payment.date.isSame(startDate)
   );
 
-  if (monthsActivity.length > 0) {
-    for (const activity of monthsActivity) {
+  if (daysActivity.length > 0) {
+    for (const activity of daysActivity) {
       if (activity.repayment) {
         currentBalance = currentBalance.minus(activity.amount);
         totalRepayments = totalRepayments.plus(activity.amount);
@@ -40,12 +47,10 @@ while (startDate.isBefore(dayjs())) {
     }
   }
 
-  startDate = startDate.add(1, "month");
+  dailyBalance.push({
+    balance: currentBalance,
+    interestAdded: dailyInterest,
+    date: startDate,
+  });
+  startDate = startDate.add(1, "day");
 }
-
-console.log(
-  `currentBalance :>>`,
-  currentBalance.toDecimalPlaces(2).toString(),
-  totalInterestAccrued.toDecimalPlaces(2).toString(),
-  totalRepayments.toDecimalPlaces(2).toString()
-);
