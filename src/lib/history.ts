@@ -1,7 +1,7 @@
 import Decimal from "decimal.js";
-// import customParseFormat from "dayjs/plugin/customParseFormat";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import dayjs from "dayjs";
-// dayjs.extend(customParseFormat);
+dayjs.extend(customParseFormat);
 
 
 const INTEREST_RATE = 0.05;
@@ -9,7 +9,7 @@ const FIRST_LOAN_AMOUNT = 18_000;
 
 export const history = [
   {
-    date: dayjs("9-30-2024", "M-D-YYYY", true),
+    date: dayjs("9-30-2024"),
     amount: new Decimal(18_000),
     repayment: false,
   },
@@ -29,7 +29,9 @@ export let dailyBalance: {
 }];
 
 const today = dayjs();
+console.log(`today :>>`, today);
 let startDate = history[0].date.add(1, "day"); // Interest starts accruing the day after the first loan
+console.log(`startDate :>>`, startDate);
 while (startDate.isBefore(today)) {
   const dailyInterest = currentBalance.times(INTEREST_RATE).dividedBy(365);
   totalInterestAccrued = totalInterestAccrued.plus(dailyInterest);
