@@ -1,12 +1,15 @@
 import Decimal from "decimal.js";
+// import customParseFormat from "dayjs/plugin/customParseFormat";
 import dayjs from "dayjs";
+// dayjs.extend(customParseFormat);
+
 
 const INTEREST_RATE = 0.05;
 const FIRST_LOAN_AMOUNT = 18_000;
 
 export const history = [
   {
-    date: dayjs("9-30-2024"),
+    date: dayjs("9-30-2024", "M-D-YYYY", true),
     amount: new Decimal(18_000),
     repayment: false,
   },
