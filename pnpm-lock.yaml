@@ -17,9 +17,6 @@ importers:
       decimal.js:
         specifier: ^10.4.3
         version: 10.4.3
-      svelte-chartjs:
-        specifier: ^3.1.5
-        version: 3.1.5(chart.js@4.4.4)(svelte@4.2.19)
     devDependencies:
       '@sveltejs/vite-plugin-svelte':
         specifier: ^3.1.2
@@ -432,12 +429,6 @@ packages:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
 
-  svelte-chartjs@3.1.5:
-    resolution: {integrity: sha512-ka2zh7v5FiwfAX1oMflZ0HkNkgjHjFqANgRyC+vNYXfxtx2ku68Zo+2KgbKeBH2nS1ThDqkIACPzGxy4T0UaoA==}
-    peerDependencies:
-      chart.js: ^3.5.0 || ^4.0.0
-      svelte: ^4.0.0
-
   svelte-check@4.0.4:
     resolution: {integrity: sha512-AcHWIPuZb1mh/jKoIrww0ebBPpAvwWd1bfXCnwC2dx4OkydNMaiG//+Xnry91RJMHFH7CiE+6Y2p332DRIaOXQ==}
     engines: {node: '>= 18.0.0'}
@@ -808,11 +799,6 @@ snapshots:
       mri: 1.2.0
 
   source-map-js@1.2.1: {}
-
-  svelte-chartjs@3.1.5(chart.js@4.4.4)(svelte@4.2.19):
-    dependencies:
-      chart.js: 4.4.4
-      svelte: 4.2.19
 
   svelte-check@4.0.4(svelte@4.2.19)(typescript@5.6.2):
     dependencies:

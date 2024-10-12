@@ -1,5 +1,7 @@
-<script>
-  import { history } from "./history";
+<script lang="ts">
+  import type { HistoryEntry } from "../types";
+
+  export let history: HistoryEntry[] = [];
 </script>
 
 <section id="history">

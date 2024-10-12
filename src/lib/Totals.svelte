@@ -1,9 +1,7 @@
-<script>
-  import {
-    totalInterestAccrued,
-    totalRepayments,
-    currentBalance,
-  } from "./history";
+<script lang="ts">
+  import type { LoanDetails } from "../types";
+
+  export let loanDetails: LoanDetails;
 </script>
 
 <section id="totals" aria-details="balance totals">
@@ -11,7 +9,7 @@
     <div class="current-balance">
       <h3>Current Balance</h3>
       <p>
-        {currentBalance
+        {loanDetails.currentBalance
           .toNumber()
           .toLocaleString("en-US", { style: "currency", currency: "USD" })}
       </p>
@@ -20,7 +18,7 @@
     <div class="total-interest">
       <h3>Total Interest Accrued</h3>
       <p>
-        {totalInterestAccrued
+        {loanDetails.totalInterestAccrued
           .toNumber()
           .toLocaleString("en-US", { style: "currency", currency: "USD" })}
       </p>
@@ -29,7 +27,7 @@
     <div class="total-repayments">
       <h3>Total Repayments</h3>
       <p>
-        {totalRepayments
+        {loanDetails.totalRepayments
           .toNumber()
           .toLocaleString("en-US", { style: "currency", currency: "USD" })}
       </p>
