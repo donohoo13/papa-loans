@@ -7,7 +7,7 @@
 
   export let loanDetails: LoanDetails;
   export let name: string;
-  let storageKey = `${name}-access`.toLowerCase();
+  $: storageKey = `${name}-access`.toLowerCase();
 
   let password = "";
   let accessAllowed = false;

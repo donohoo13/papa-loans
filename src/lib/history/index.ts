@@ -17,15 +17,6 @@ export function calculateLoan(history: HistoryEntry[]) {
     return DEFAULT_LOAN_DETAILS;
   }
 
-  // const loanDayOne = history[0];
-  // const initialLoanAmount = new Decimal(loanDayOne.amount);
-  // const loanDetails = {...DEFAULT_LOAN_DETAILS, currentBalance: initialLoanAmount, history: [...history]};
-  // loanDetails.dailyBalance.push({
-  //     balance: initialLoanAmount,
-  //     interestAdded: new Decimal(0),
-  //     date: loanDayOne.date,
-  // });
-
   let totalInterestAccrued = new Decimal(0);
   let totalRepayments = new Decimal(0);
   let currentBalance = history[0].amount;
