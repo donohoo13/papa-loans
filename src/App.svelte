@@ -6,10 +6,14 @@
   import LoanBreakdown from "./components/LoanBreakdown.svelte";
   import { connerLoanDetails } from "./lib/history/conner-history";
   import { tatumLoanDetails } from "./lib/history/tatum-history";
+  import { greggLoanDetails } from "./lib/history/gregg-history";
+  import { erikLoanDetails } from "./lib/history/erik-history";
 
   const tabs: ContentTab[] = [
     { index: 0, label: "Conner" },
     { index: 1, label: "Tatum" },
+    { index: 2, label: "Gregg" },
+    { index: 3, label: "Erik" },
   ];
 
   let currentDateTime = dayjs();
@@ -31,8 +35,12 @@
   <Tabs {tabs} let:tabIndex>
     {#if tabIndex === 0}
       <LoanBreakdown loanDetails={connerLoanDetails} name="Conner" />
-    {:else}
+    {:else if tabIndex === 1}
       <LoanBreakdown loanDetails={tatumLoanDetails} name="Tatum" />
+    {:else if tabIndex === 2}
+      <LoanBreakdown loanDetails={greggLoanDetails} name="Gregg" />
+    {:else if tabIndex === 3}
+      <LoanBreakdown loanDetails={erikLoanDetails} name="Erik" />
     {/if}
   </Tabs>
 
