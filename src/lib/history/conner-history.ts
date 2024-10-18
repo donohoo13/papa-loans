@@ -6,8 +6,13 @@ import { calculateLoan } from ".";
 
 const history: HistoryEntry[] = [
   {
-    date: dayjs("09/30/2024"),
+    date: dayjs("10/01/2024"),
     amount: new Decimal(18_000),
+    repayment: false,
+  },
+  {
+    date: dayjs("10/18/2024"),
+    amount: new Decimal(15_000),
     repayment: false,
   },
 ] as const;
