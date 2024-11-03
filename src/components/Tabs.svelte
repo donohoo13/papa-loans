@@ -73,6 +73,10 @@
     display: flex;
     gap: 1rem;
     border-bottom: 4px solid var(--clr-primary);
+    max-width: 95vw;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+    scroll-snap-type: x mandatory;
   }
 
   [role="tab"] {
@@ -87,6 +91,8 @@
     font-size: 1.4rem;
     text-transform: uppercase;
     font-weight: 500;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
 
     &:focus {
       outline: none;

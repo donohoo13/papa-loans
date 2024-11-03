@@ -28,8 +28,8 @@ export function calculateLoan(history: HistoryEntry[]) {
     },
   ];
 
-  let startDate = history[0].date.add(1, "day"); // Interest starts accruing the day after the first loan
-  while (startDate.isBefore(TODAY)) {
+  let startDate = history[0].date.add(1, "day"); // Interest starts accruing the day after the first loan amount
+  while (startDate.isBefore(TODAY) || startDate.isSame(TODAY)) {
     const dailyInterest = currentBalance
       .times(INTEREST_RATE)
       .dividedBy(365);

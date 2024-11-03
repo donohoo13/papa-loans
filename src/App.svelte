@@ -8,12 +8,14 @@
   import { tatumLoanDetails } from "./lib/history/tatum-history";
   import { greggLoanDetails } from "./lib/history/gregg-history";
   import { erikLoanDetails } from "./lib/history/erik-history";
+  import { maysonLoanDetails } from "./lib/history/mayson-history";
 
   const tabs: ContentTab[] = [
-    { index: 0, label: "Conner" },
-    { index: 1, label: "Tatum" },
+    { index: 0, label: "Mayson" },
+    { index: 1, label: "Conner" },
     { index: 2, label: "Gregg" },
     { index: 3, label: "Erik" },
+    { index: 4, label: "Tatum" },
   ];
 
   let currentDateTime = dayjs();
@@ -34,13 +36,15 @@
 
   <Tabs {tabs} let:tabIndex>
     {#if tabIndex === 0}
-      <LoanBreakdown loanDetails={connerLoanDetails} name="Conner" />
+      <LoanBreakdown loanDetails={maysonLoanDetails} name="Mayson" />
     {:else if tabIndex === 1}
-      <LoanBreakdown loanDetails={tatumLoanDetails} name="Tatum" />
+      <LoanBreakdown loanDetails={connerLoanDetails} name="Conner" />
     {:else if tabIndex === 2}
       <LoanBreakdown loanDetails={greggLoanDetails} name="Gregg" />
     {:else if tabIndex === 3}
       <LoanBreakdown loanDetails={erikLoanDetails} name="Erik" />
+    {:else if tabIndex === 4}
+      <LoanBreakdown loanDetails={tatumLoanDetails} name="Tatum" />
     {/if}
   </Tabs>
 

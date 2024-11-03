@@ -6,15 +6,10 @@ import { calculateLoan } from ".";
 
 const history: HistoryEntry[] = [
   {
-    date: dayjs("10/01/2024"),
-    amount: new Decimal(200_000),
+    date: dayjs("11/01/2024"),
+    amount: new Decimal(182_000),
     repayment: false,
-  },
-  {
-    date: dayjs("10/31/2024"),
-    amount: new Decimal(832),
-    repayment: true,
   },
 ] as const;
 
-export const greggLoanDetails: LoanDetails = calculateLoan(history); 
+export const maysonLoanDetails: LoanDetails = calculateLoan(history); 
