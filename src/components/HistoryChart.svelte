@@ -33,6 +33,8 @@
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      tension: 0,
+      cubicInterpolationMode: "monotone",
       scales: {
         y: {
           beginAtZero: false,

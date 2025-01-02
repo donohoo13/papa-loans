@@ -1,9 +1,9 @@
 <script lang="ts">
-  import Totals from "../lib/Totals.svelte";
-  import History from "../lib/History.svelte";
-  import HistoryChart from "./HistoryChart.svelte";
-  import type { LoanDetails } from "../types";
   import { onMount } from "svelte";
+  import History from "../lib/History.svelte";
+  import Totals from "../lib/Totals.svelte";
+  import type { LoanDetails } from "../types";
+  import HistoryChart from "./HistoryChart.svelte";
 
   export let loanDetails: LoanDetails;
   export let name: string;
@@ -40,7 +40,7 @@
     <div>
       <form on:submit={handleAccess}>
         <label for="password">Enter password to view loan details:</label>
-        <input type="password" id="password" bind:value={password} />
+        <input type="password" id="password-{name}" bind:value={password} />
         <button>Submit</button>
       </form>
     </div>
