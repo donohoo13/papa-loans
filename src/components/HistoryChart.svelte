@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { onMount, onDestroy, afterUpdate } from "svelte";
   import { Chart, type ChartConfiguration } from "chart.js/auto";
+  import { afterUpdate, onDestroy, onMount } from "svelte";
   import type { DailyBalance } from "../types";
 
   export let dailyBalance: DailyBalance[];
@@ -9,12 +9,16 @@
   let canvas: HTMLCanvasElement;
   let chart: Chart;
 
+  // only display totals for every 5 days
+  $: filteredDailyBalance =
+    dailyBalance.length > 25 ? dailyBalance.filter((_, index) => index % 5 === 0) : dailyBalance;
+
   $: chartData = {
-    labels: dailyBalance.map(({ date }) => date.format("MM-DD-YYYY")),
+    labels: filteredDailyBalance.map(({ date }) => date.format("MM-DD-YYYY")),
     datasets: [
       {
         label: "Daily Balance",
-        data: dailyBalance.map((db) => +db.balance.toDecimalPlaces(2)),
+        data: filteredDailyBalance.map((db) => +db.balance.toDecimalPlaces(2)),
         fill: false,
         borderColor: "hsl(20, 50%, 30%)",
         backgroundColor: "hsl(20, 50%, 30%)",
