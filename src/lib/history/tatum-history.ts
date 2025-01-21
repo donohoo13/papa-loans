@@ -20,6 +20,11 @@ const history: HistoryEntry[] = [
     amount: new Decimal(760.17),
     repayment: true,
   },
+  {
+    date: dayjs("01/15/2024"),
+    amount: new Decimal(752.54),
+    repayment: true,
+  },
 ] as const;
 
 export const tatumLoanDetails: LoanDetails = calculateLoan(history); 
