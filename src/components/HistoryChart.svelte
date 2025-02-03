@@ -1,6 +1,9 @@
 <script lang="ts">
   import { Chart, type ChartConfiguration } from "chart.js/auto";
   import { afterUpdate, onDestroy, onMount } from "svelte";
+  import { COLORS } from "../lib/config/constants";
+  import { formatCurrency } from "../lib/utils/currency";
+  import { formatDate } from "../lib/utils/dates";
   import type { DailyBalance } from "../types";
 
   export let dailyBalance: DailyBalance[];
@@ -9,21 +12,46 @@
   let canvas: HTMLCanvasElement;
   let chart: Chart;
 
-  // only display totals for every 5 days
-  $: filteredDailyBalance =
-    dailyBalance.length > 25 ? dailyBalance.filter((_, index) => index % 5 === 0) : dailyBalance;
+  // Add brand color constant
+  const BRAND_COLOR = 'hsl(23, 72%, 17%)';
+  const BRAND_COLOR_TRANSPARENT = 'hsl(23, 72%, 17%, 0.1)';
+
+  // Optimize data points for large datasets
+  function optimizeDataPoints(data: DailyBalance[]): DailyBalance[] {
+    if (data.length <= 50) return data;
+
+    // For larger datasets, sample points based on total length
+    const samplingRate = Math.ceil(data.length / 50);
+    return data.filter((_, index) => index % samplingRate === 0);
+  }
+
+  $: filteredDailyBalance = optimizeDataPoints(dailyBalance);
 
   $: chartData = {
-    labels: filteredDailyBalance.map(({ date }) => date.format("MM-DD-YYYY")),
+    labels: filteredDailyBalance.map(({ date }) => formatDate(date, "MMM D")),
     datasets: [
       {
-        label: "Daily Balance",
+        label: "Balance",
         data: filteredDailyBalance.map((db) => +db.balance.toDecimalPlaces(2)),
-        fill: false,
-        borderColor: "hsl(20, 50%, 30%)",
-        backgroundColor: "hsl(20, 50%, 30%)",
-        tension: 0.5,
-      },
+        fill: {
+          target: 'origin',
+          above: BRAND_COLOR_TRANSPARENT,
+        },
+        borderColor: BRAND_COLOR,
+        backgroundColor: BRAND_COLOR,
+        tension: 0.2,
+        pointRadius: (ctx: { dataIndex: number; dataset: { data: number[] } }) => {
+          // Show points only for start, end, and significant changes
+          const index = ctx.dataIndex;
+          if (index === 0 || index === filteredDailyBalance.length - 1) return 4;
+          
+          const currentValue = ctx.dataset.data[index];
+          const prevValue = ctx.dataset.data[index - 1];
+          const change = Math.abs((currentValue - prevValue) / prevValue);
+          
+          return change > 0.05 ? 4 : 0; // Show point if change > 5%
+        },
+      }
     ],
   };
 
@@ -33,47 +61,129 @@
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      tension: 0,
-      cubicInterpolationMode: "monotone",
+      animation: {
+        duration: 750,
+        easing: 'easeInOutQuart'
+      },
+      interaction: {
+        intersect: false,
+        mode: 'index',
+      },
+      plugins: {
+        title: {
+          display: true,
+          text: 'Loan Balance Over Time',
+          font: {
+            size: 16,
+            weight: 'bold'
+          }
+        },
+        legend: {
+          display: false
+        },
+        tooltip: {
+          callbacks: {
+            label: (context: { parsed: { y: number } }) => {
+              return `Balance: ${formatCurrency(context.parsed.y)}`;
+            }
+          }
+        }
+      },
       scales: {
+        x: {
+          grid: {
+            display: false
+          },
+          ticks: {
+            maxTicksLimit: 12,
+            maxRotation: 45,
+            minRotation: 45
+          }
+        },
         y: {
           beginAtZero: false,
-        },
-      },
+          ticks: {
+            callback: (value: number) => formatCurrency(value)
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          }
+        }
+      }
     },
   } as ChartConfiguration;
 
-  function createChart() {
-    if (canvas && !chart) {
-      chart = new Chart(canvas, chartConfig);
+  function initChart() {
+    if (canvas) {
+      chart?.destroy();
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        chart = new Chart(ctx, chartConfig);
+      }
     }
   }
 
-  function updateChart() {
-    if (chart) {
-      chart.data = chartData;
-      chart.update();
-    }
-  }
+  onMount(() => {
+    initChart();
+  });
 
-  onMount(createChart);
-
-  afterUpdate(updateChart);
+  afterUpdate(() => {
+    initChart();
+  });
 
   onDestroy(() => {
-    if (chart) {
-      chart.destroy();
-    }
+    chart?.destroy();
   });
 </script>
 
-<section id="{key}-history-chart" aria-details="{key} history totals chart">
-  <canvas bind:this={canvas} width={400} height={400}></canvas>
-</section>
+<div class="chart-container" aria-label="Line chart showing loan balance over time">
+  <canvas
+    bind:this={canvas}
+    role="img"
+    aria-label="Loan balance trend chart"
+    id="chart-{key}"
+  />
+  <div class="chart-summary" aria-live="polite">
+    <p>
+      Starting balance: {formatCurrency(dailyBalance[0].balance)}
+    </p>
+    <p>
+      Current balance: {formatCurrency(dailyBalance[dailyBalance.length - 1].balance)}
+    </p>
+  </div>
+</div>
 
 <style>
-  canvas {
-    max-width: 100%;
-    height: auto;
+  .chart-container {
+    position: relative;
+    height: 400px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 1rem;
+  }
+
+  .chart-summary {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 1.4rem;
+  }
+
+  .chart-summary p {
+    margin: 0.5rem 0;
+  }
+
+  @media (max-width: 768px) {
+    .chart-container {
+      height: 300px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.chart-container *) {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 </style>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatCurrency } from '../lib/utils/currency';
   import type { LoanDetails } from "../types";
 
   export let loanDetails: LoanDetails;
@@ -8,29 +9,17 @@
   <div class="breakdown">
     <div class="current-balance">
       <h3>Current Balance</h3>
-      <p>
-        {loanDetails.currentBalance
-          .toNumber()
-          .toLocaleString("en-US", { style: "currency", currency: "USD" })}
-      </p>
+      <p>{formatCurrency(loanDetails.currentBalance)}</p>
     </div>
 
     <div class="total-interest">
       <h3>Total Interest Accrued</h3>
-      <p>
-        {loanDetails.totalInterestAccrued
-          .toNumber()
-          .toLocaleString("en-US", { style: "currency", currency: "USD" })}
-      </p>
+      <p>{formatCurrency(loanDetails.totalInterestAccrued)}</p>
     </div>
 
     <div class="total-repayments">
       <h3>Total Repayments</h3>
-      <p>
-        {loanDetails.totalRepayments
-          .toNumber()
-          .toLocaleString("en-US", { style: "currency", currency: "USD" })}
-      </p>
+      <p>{formatCurrency(loanDetails.totalRepayments)}</p>
     </div>
   </div>
 </section>

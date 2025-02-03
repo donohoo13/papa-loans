@@ -8,33 +8,34 @@
   const dispatch = createEventDispatcher();
 
   function selectTab(index: number) {
-    if (activeTab !== index) {
-      activeTab = index;
-      dispatch("tabChange", { selectedTab: index });
-    }
+    if (activeTab === index) return;
+    activeTab = index;
+    dispatch("tabChange", { selectedTab: index });
   }
 
   function handleKeydown(event: KeyboardEvent, index: number) {
+    const lastIndex = tabs.length - 1;
+    
     switch (event.key) {
       case "ArrowLeft":
-        selectTab(index === 0 ? tabs.length - 1 : index - 1);
+        selectTab(index === 0 ? lastIndex : index - 1);
         break;
-      case "ArrowRight":
-        selectTab(index === tabs.length - 1 ? 0 : index + 1);
+      case "ArrowRight": 
+        selectTab(index === lastIndex ? 0 : index + 1);
         break;
       case "Home":
         selectTab(0);
         break;
       case "End":
-        selectTab(tabs.length - 1);
+        selectTab(lastIndex);
         break;
     }
   }
 </script>
 
 <div class="tabs">
-  <div role="tablist" aria-label="Tabs example">
-    {#each tabs as tab}
+  <div role="tablist" aria-label="Content tabs">
+    {#each tabs as tab (tab.index)}
       <button
         role="tab"
         aria-selected={activeTab === tab.index}
@@ -49,7 +50,7 @@
     {/each}
   </div>
 
-  {#each tabs as tab}
+  {#each tabs as tab (tab.index)}
     <div
       role="tabpanel"
       id="panel-{tab.index}"
@@ -57,7 +58,6 @@
       hidden={activeTab !== tab.index}
     >
       <slot {activeTab} tabIndex={tab.index}>
-        <!-- Default content if no slot is provided -->
         <p>No content provided for tab {tab.index + 1}</p>
       </slot>
     </div>
@@ -81,8 +81,7 @@
 
   [role="tab"] {
     background-color: var(--clr-transparent);
-    border-color: var(--clr-primary);
-    border-width: 4px;
+    border: 4px solid var(--clr-primary);
     border-bottom: none;
     border-radius: 0.25rem 0.25rem 0 0;
     padding: 1.5rem 3rem;
@@ -93,14 +92,14 @@
     font-weight: 500;
     scroll-snap-align: start;
     scroll-snap-stop: always;
+  }
 
-    &:focus {
-      outline: none;
-    }
+  [role="tab"]:focus {
+    outline: none;
+  }
 
-    &:hover {
-      background-color: hsl(from var(--clr-primary) h s l / 0.6);
-    }
+  [role="tab"]:hover {
+    background-color: hsl(from var(--clr-primary) h s l / 0.6);
   }
 
   [role="tab"][aria-selected="true"] {
@@ -109,6 +108,5 @@
 
   [role="tabpanel"] {
     padding: 15px;
-    /* border: 1px solid #ddd; */
   }
 </style>

@@ -1,9 +1,13 @@
-import Decimal from "decimal.js";
 import dayjs from "dayjs";
+import Decimal from "decimal.js";
 import type { DailyBalance, HistoryEntry, LoanDetails } from "../../types";
+import {
+  DAYS_IN_YEAR,
+  INTEREST_RATE,
+  TODAY
+} from '../config/constants';
+import { compareDates } from '../utils/dates';
 
-const INTEREST_RATE = 0.05;
-const TODAY = dayjs();
 const DEFAULT_LOAN_DETAILS: LoanDetails = {
   history: [],
   totalInterestAccrued: new Decimal(0),
@@ -12,65 +16,75 @@ const DEFAULT_LOAN_DETAILS: LoanDetails = {
   dailyBalance: [],
 };
 
-export function calculateLoan(history: HistoryEntry[]) {
+function validateHistoryEntry(entry: HistoryEntry) {
+  if (!entry.date || !entry.amount) {
+    throw new Error('Invalid history entry: date and amount are required');
+  }
+  if (entry.amount.isNegative()) {
+    throw new Error('Invalid history entry: amount cannot be negative');
+  }
+}
+
+export function calculateLoan(history: HistoryEntry[]): LoanDetails {
+  if (!Array.isArray(history)) {
+    throw new Error('History must be an array');
+  }
+
   if (history.length === 0) {
     return DEFAULT_LOAN_DETAILS;
   }
 
+  history.forEach(validateHistoryEntry);
+
+  const sortedHistory = [...history].sort((a, b) => compareDates(a.date, b.date));
+
   let totalInterestAccrued = new Decimal(0);
   let totalRepayments = new Decimal(0);
-  let currentBalance = history[0].amount;
-  let dailyBalance: DailyBalance[] = [
-    {
-      balance: currentBalance,
-      interestAdded: new Decimal(0),
-      date: history[0].date,
-    },
-  ];
+  let currentBalance = sortedHistory[0].amount;
+  let dailyBalance: DailyBalance[] = [{
+    balance: currentBalance,
+    interestAdded: new Decimal(0),
+    date: sortedHistory[0].date,
+  }];
 
-  let startDate = history[0].date.add(1, "day"); // Interest starts accruing the day after the first loan amount
-  while (startDate.isBefore(TODAY) || startDate.isSame(TODAY)) {
+  let currentDate = sortedHistory[0].date.add(1, "day");
+
+  while (currentDate.isBefore(TODAY) || currentDate.isSame(TODAY, 'day')) {
     const dailyInterest = currentBalance
       .times(INTEREST_RATE)
-      .dividedBy(365);
-    totalInterestAccrued =
-      totalInterestAccrued.plus(dailyInterest);
+      .dividedBy(DAYS_IN_YEAR)
+      .toDecimalPlaces(6);
+
+    totalInterestAccrued = totalInterestAccrued.plus(dailyInterest);
     currentBalance = currentBalance.plus(dailyInterest);
 
-    const daysActivity = history.filter((payment) =>
-      payment.date.isSame(startDate)
+    const daysTransactions = sortedHistory.filter(entry => 
+      entry.date.isSame(currentDate, 'day')
     );
 
-    if (daysActivity.length > 0) {
-      for (const activity of daysActivity) {
-        if (activity.repayment) {
-          currentBalance = currentBalance.minus(
-            activity.amount
-          );
-          totalRepayments = totalRepayments.plus(
-            activity.amount
-          );
-        } else {
-          currentBalance = currentBalance.plus(
-            activity.amount
-          );
-        }
+    for (const transaction of daysTransactions) {
+      if (transaction.repayment) {
+        currentBalance = currentBalance.minus(transaction.amount);
+        totalRepayments = totalRepayments.plus(transaction.amount);
+      } else {
+        currentBalance = currentBalance.plus(transaction.amount);
       }
     }
 
     dailyBalance.push({
       balance: currentBalance,
       interestAdded: dailyInterest,
-      date: startDate,
+      date: currentDate,
     });
-    startDate = startDate.add(1, "day");
+
+    currentDate = currentDate.add(1, "day");
   }
 
   return {
-    history,
+    history: sortedHistory,
     totalInterestAccrued,
     totalRepayments,
     currentBalance,
     dailyBalance,
-    };
+  };
 }
