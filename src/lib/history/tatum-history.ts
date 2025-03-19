@@ -21,7 +21,12 @@ const history: HistoryEntry[] = [
     repayment: true,
   },
   {
-    date: dayjs("01/15/2024"),
+    date: dayjs("01/15/2025"),
+    amount: new Decimal(752.54),
+    repayment: true,
+  },
+  {
+    date: dayjs("03/18/2025"),
     amount: new Decimal(752.54),
     repayment: true,
   },
