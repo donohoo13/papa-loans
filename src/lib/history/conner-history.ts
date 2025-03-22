@@ -1,7 +1,7 @@
-import Decimal from "decimal.js";
 import dayjs from "dayjs";
-import type {  HistoryEntry, LoanDetails } from "../../types";
+import Decimal from "decimal.js";
 import { calculateLoan } from ".";
+import type { HistoryEntry, LoanDetails } from "../../types";
 
 
 const history: HistoryEntry[] = [
@@ -17,6 +17,11 @@ const history: HistoryEntry[] = [
   },
   {
     date: dayjs("11/01/2024"),
+    amount: new Decimal(1_500),
+    repayment: true,
+  },
+  {
+    date: dayjs("03/22/2025"),
     amount: new Decimal(1_500),
     repayment: true,
   },
