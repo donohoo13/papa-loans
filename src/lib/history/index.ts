@@ -41,6 +41,7 @@ export function calculateLoan(history: HistoryEntry[]): LoanDetails {
   let totalInterestAccrued = new Decimal(0);
   let totalRepayments = new Decimal(0);
   let currentBalance = sortedHistory[0].amount;
+  let accruedInterest = new Decimal(0);
   let dailyBalance: DailyBalance[] = [{
     balance: currentBalance,
     interestAdded: new Decimal(0),
@@ -56,6 +57,7 @@ export function calculateLoan(history: HistoryEntry[]): LoanDetails {
       .toDecimalPlaces(6);
 
     totalInterestAccrued = totalInterestAccrued.plus(dailyInterest);
+    accruedInterest = accruedInterest.plus(dailyInterest);
     currentBalance = currentBalance.plus(dailyInterest);
 
     const daysTransactions = sortedHistory.filter(entry => 
@@ -64,7 +66,15 @@ export function calculateLoan(history: HistoryEntry[]): LoanDetails {
 
     for (const transaction of daysTransactions) {
       if (transaction.repayment) {
-        currentBalance = currentBalance.minus(transaction.amount);
+        let remainingPayment = transaction.amount;
+        
+        if (accruedInterest.greaterThan(0)) {
+          const interestPayment = Decimal.min(remainingPayment, accruedInterest);
+          accruedInterest = accruedInterest.minus(interestPayment);
+          remainingPayment = remainingPayment.minus(interestPayment);
+        }
+        
+        currentBalance = currentBalance.minus(remainingPayment);
         totalRepayments = totalRepayments.plus(transaction.amount);
       } else {
         currentBalance = currentBalance.plus(transaction.amount);

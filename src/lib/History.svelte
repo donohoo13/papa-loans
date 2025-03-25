@@ -5,14 +5,14 @@
   export let history: HistoryEntry[] = [];
 </script>
 
-<section id="history">
+<section id="history" class="history-section">
   <h2>Transaction History</h2>
   {#if history.length === 0}
     <p class="no-history">No transactions recorded</p>
   {:else}
     <ul>
       {#each history as { date, amount, repayment }}
-        <li class="transaction {repayment ? 'repayment' : 'loan'}">
+        <li class="transaction-card {repayment ? 'repayment' : 'loan'}">
           <div class="transaction-date">
             {date.format("MMMM D, YYYY")}
           </div>
@@ -23,12 +23,10 @@
                 aria-hidden="true"
               />
             </span>
-            <span class="amount">
-              {formatCurrency(amount)}
-            </span>
-            <span class="type">
-              {repayment ? 'Payment' : 'Loan Amount'}
-            </span>
+            <div class="transaction-info">
+              <span class="amount">{formatCurrency(amount)}</span>
+              <span class="type">{repayment ? 'Payment' : 'Loan Amount'}</span>
+            </div>
           </div>
         </li>
       {/each}
@@ -37,7 +35,7 @@
 </section>
 
 <style>
-  #history {
+  .history-section {
     max-width: 1200px;
     margin: 4rem auto;
     padding: 0 2rem;
@@ -46,14 +44,15 @@
   h2 {
     text-align: center;
     font-size: 2.4rem;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
+    color: var(--clr-text);
+    font-weight: 500;
   }
 
   .no-history {
     text-align: center;
     font-style: italic;
-    color: var(--clr-text);
-    opacity: 0.7;
+    color: var(--clr-muted);
   }
 
   ul {
@@ -68,23 +67,25 @@
     }
   }
 
-  .transaction {
+  .transaction-card {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    padding: 1.5rem;
-    border-radius: 0.8rem;
-    background-color: var(--clr-primary);
-    transition: transform 0.2s ease;
+    gap: 1rem;
+    padding: 1.8rem;
+    border-radius: 1rem;
+    background-color: var(--clr-surface);
+    transition: transform 0.2s ease, background-color 0.2s ease;
+  }
 
-    &:hover {
-      transform: translateY(-0.25rem);
-    }
+  .transaction-card:hover {
+    transform: translateY(-2px);
+    background-color: var(--clr-surface-hover);
   }
 
   .transaction-date {
-    font-weight: bold;
-    font-size: 1.6rem;
+    font-size: 1.4rem;
+    color: var(--clr-muted);
+    letter-spacing: 0.05em;
   }
 
   .transaction-details {
@@ -93,14 +94,33 @@
     gap: 1.5rem;
   }
 
+  .transaction-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
   .amount {
-    font-weight: bold;
-    font-size: 1.6rem;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--clr-text);
   }
 
   .type {
-    font-size: 1.4rem;
-    opacity: 0.8;
+    font-size: 1.3rem;
+    color: var(--clr-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 0.8rem;
+    background-color: var(--clr-surface-hover);
   }
 
   .repayment .icon {

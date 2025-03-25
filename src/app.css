@@ -1,8 +1,11 @@
 :root {
-  --clr-text: hsl(23 100% 95%);
-  --clr-bg: hsl(23 5% 5%);
+  --clr-text: hsl(23 100% 98%);
+  --clr-bg: hsl(23 10% 4%);
   --clr-primary: hsl(23 72% 17%);
-  --clr-secondary: hsl(50 60% 55%);
+  --clr-secondary: hsl(50 85% 60%);
+  --clr-surface: hsl(23 12% 11%);
+  --clr-surface-hover: hsl(23 12% 13%);
+  --clr-muted: hsl(23 30% 80%);
   --bkpt-mobile: 600px;
   --bkpt-tablet: 900px;
   --bkpt-laptop: 1200px;
@@ -12,7 +15,7 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
+  color-scheme: dark;
   color: var(--clr-text);
   background-color: var(--clr-bg);
   font-size: 62.5%; /* 1rem = 10px */
@@ -31,7 +34,9 @@ a {
   font-weight: 500;
   color: var(--clr-primary);
   text-decoration: inherit;
+  transition: color 0.2s ease;
 }
+
 a:hover {
   color: var(--clr-secondary);
 }

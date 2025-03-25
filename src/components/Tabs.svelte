@@ -71,42 +71,73 @@
 
   [role="tablist"] {
     display: flex;
-    gap: 1rem;
-    border-bottom: 4px solid var(--clr-primary);
+    gap: 0.5rem;
+    border-bottom: 2px solid var(--clr-surface-hover);
     max-width: 95vw;
     overflow-x: auto;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
     scroll-snap-type: x mandatory;
+    padding-bottom: 2px;
   }
 
   [role="tab"] {
-    background-color: var(--clr-transparent);
-    border: 4px solid var(--clr-primary);
-    border-bottom: none;
-    border-radius: 0.25rem 0.25rem 0 0;
-    padding: 1.5rem 3rem;
+    background-color: var(--clr-surface);
+    border: none;
+    border-radius: 0.6rem 0.6rem 0 0;
+    padding: 1.2rem 2.4rem;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease;
     font-size: 1.4rem;
     text-transform: uppercase;
     font-weight: 500;
+    color: var(--clr-muted);
+    letter-spacing: 0.05em;
     scroll-snap-align: start;
     scroll-snap-stop: always;
+    position: relative;
+  }
+
+  [role="tab"]::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--clr-primary);
+    transform: scaleX(0);
+    transition: transform 0.2s ease;
   }
 
   [role="tab"]:focus {
     outline: none;
+    background-color: var(--clr-surface-hover);
   }
 
   [role="tab"]:hover {
-    background-color: hsl(from var(--clr-primary) h s l / 0.6);
+    background-color: var(--clr-surface-hover);
+    color: var(--clr-text);
   }
 
   [role="tab"][aria-selected="true"] {
-    background-color: var(--clr-primary);
+    color: var(--clr-text);
+    background-color: var(--clr-surface-hover);
+  }
+
+  [role="tab"][aria-selected="true"]::after {
+    transform: scaleX(1);
   }
 
   [role="tabpanel"] {
-    padding: 15px;
+    padding: 2rem;
+    /* background-color: var(--clr-surface);
+    border-radius: 1rem; */
+  }
+
+  @media (max-width: 768px) {
+    [role="tab"] {
+      padding: 1rem 1.8rem;
+      font-size: 1.3rem;
+    }
   }
 </style>

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import History from "../lib/History.svelte";
-  import Totals from "../lib/Totals.svelte";
+  import LoanOverview from "../lib/LoanOverview.svelte";
   import type { LoanDetails } from "../types";
   import HistoryChart from "./HistoryChart.svelte";
 
@@ -31,12 +31,20 @@
 <div class="loan-breakdown">
   <h2>{name}</h2>
   {#if accessAllowed}
-    <Totals {loanDetails} />
+    <div class="loan-breakdown-container">
+      <div>
 
-    <History history={loanDetails.history} />
+        <LoanOverview {loanDetails} />
+      </div>
+      <div>
 
-    <HistoryChart dailyBalance={loanDetails.dailyBalance} key={name} />
-  {:else}
+        <HistoryChart dailyBalance={loanDetails.dailyBalance} key={name} />
+      </div>
+      <div>
+        <History history={loanDetails.history} />
+      </div>
+    </div>
+    {:else}
     <div>
       <form on:submit={handleAccess}>
         <label for="password">Enter password to view loan details:</label>
@@ -52,6 +60,18 @@
     text-align: center;
     font-size: 2.8rem;
     font-weight: bold;
+  }
+
+  .loan-breakdown-container {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: 4rem;
+
+    & > div {
+      width: 100%;
+    }
   }
 
   form {

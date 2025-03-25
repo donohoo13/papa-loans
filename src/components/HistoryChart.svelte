@@ -73,15 +73,27 @@
         title: {
           display: true,
           text: 'Loan Balance Over Time',
+          color: 'hsl(23 100% 98%)',
           font: {
             size: 16,
-            weight: 'bold'
-          }
+            weight: 500,
+            family: "'Inter', system-ui, sans-serif"
+          },
+          padding: 20
         },
         legend: {
           display: false
         },
         tooltip: {
+          backgroundColor: 'hsl(23 12% 13% / 0.95)',
+          titleColor: 'hsl(23 30% 80%)',
+          bodyColor: 'hsl(23 100% 98%)',
+          bodyFont: {
+            size: 14,
+            family: "'Inter', system-ui, sans-serif"
+          },
+          padding: 12,
+          cornerRadius: 8,
           callbacks: {
             label: (context: { parsed: { y: number } }) => {
               return `Balance: ${formatCurrency(context.parsed.y)}`;
@@ -94,19 +106,36 @@
           grid: {
             display: false
           },
+          border: {
+            display: false
+          },
           ticks: {
             maxTicksLimit: 12,
             maxRotation: 45,
-            minRotation: 45
+            minRotation: 45,
+            color: 'hsl(23 30% 80%)',
+            font: {
+              size: 12,
+              family: "'Inter', system-ui, sans-serif"
+            }
           }
         },
         y: {
           beginAtZero: false,
+          border: {
+            display: false
+          },
           ticks: {
-            callback: (value: number) => formatCurrency(value)
+            callback: (value: number) => formatCurrency(value),
+            color: 'hsl(23 30% 80%)',
+            font: {
+              size: 12,
+              family: "'Inter', system-ui, sans-serif"
+            }
           },
           grid: {
-            color: 'rgba(255, 255, 255, 0.1)'
+            color: 'hsl(23 12% 13%)',
+            lineWidth: 1
           }
         }
       }
@@ -136,7 +165,7 @@
   });
 </script>
 
-<div class="chart-container" aria-label="Line chart showing loan balance over time">
+<div class="chart-card" aria-label="Line chart showing loan balance over time">
   <canvas
     bind:this={canvas}
     role="img"
@@ -144,43 +173,41 @@
     id="chart-{key}"
   />
   <div class="chart-summary" aria-live="polite">
-    <p>
-      Starting balance: {formatCurrency(dailyBalance[0].balance)}
-    </p>
-    <p>
-      Current balance: {formatCurrency(dailyBalance[dailyBalance.length - 1].balance)}
-    </p>
   </div>
 </div>
 
 <style>
-  .chart-container {
+  .chart-card {
     position: relative;
     height: 400px;
     width: 100%;
     max-width: 1200px;
     margin: 2rem auto;
-    padding: 1rem;
+    padding: 2.4rem;
+    background-color: var(--clr-surface);
+    border-radius: 1.2rem;
+    transition: background-color 0.2s ease;
+  }
+
+  .chart-card:hover {
+    background-color: var(--clr-surface-hover);
   }
 
   .chart-summary {
-    margin-top: 1rem;
-    text-align: center;
-    font-size: 1.4rem;
-  }
-
-  .chart-summary p {
-    margin: 0.5rem 0;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid hsla(23, 30%, 80%, 0.1);
   }
 
   @media (max-width: 768px) {
-    .chart-container {
+    .chart-card {
       height: 300px;
+      padding: 1.6rem;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    :global(.chart-container *) {
+    :global(.chart-card *) {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
