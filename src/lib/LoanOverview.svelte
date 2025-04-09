@@ -50,8 +50,8 @@
 </script>
 
 <section class="loan-overview">
-  <!-- Primary Metrics -->
-  <div class="primary-metrics">
+  <!-- Row 1: Centered Balance -->
+  <div class="balance-row">
     <div class="metric-card primary">
       <h3>Current Balance</h3>
       <p class="amount">{formatCurrency(loanDetails.currentBalance)}</p>
@@ -61,25 +61,40 @@
         </p>
       {/if}
     </div>
-    
+  </div>
+
+  <!-- Row 2: Core Metrics (Interest & Repayments) -->
+  <div class="primary-metrics">
+    <!-- Total Interest Accrued -->
     <div class="metric-card">
       <h3>Total Interest Accrued</h3>
       <p class="amount subtle-red">{formatCurrency(loanDetails.totalInterestAccrued)}</p>
     </div>
     
+    <!-- Total Repayments -->
     <div class="metric-card">
       <h3>Total Repayments</h3>
       <p class="amount subtle-green">{formatCurrency(loanDetails.totalRepayments)}</p>
     </div>
+    
+    <!-- Principal Borrowed (Moved down) -->
+    <!-- 
+    <div class="metric-card">
+      <h3>Principal Borrowed</h3>
+      <p class="amount">{formatCurrency(totalPrincipal)}</p>
+    </div> 
+    -->
   </div>
 
-  <!-- Secondary Metrics -->
+  <!-- Row 3: Secondary Metrics (Including Principal) -->
   <div class="secondary-metrics">
+    <!-- Principal Borrowed (Moved here) -->
     <div class="metric-card">
       <h3>Principal Borrowed</h3>
       <p class="amount">{formatCurrency(totalPrincipal)}</p>
     </div>
-
+    
+    <!-- Est. Current Monthly Interest -->
     <div class="metric-card">
       <h3>Est. Current Monthly Interest</h3>
       <p class="amount">
@@ -88,6 +103,7 @@
       </p>
     </div>
 
+    <!-- Interest/Payment Ratio -->
     <div class="metric-card">
       <h3>
         Interest/Payment Ratio
@@ -104,6 +120,7 @@
       </p>
     </div>
 
+    <!-- Average Payment (Conditional) -->
     {#if !averageMonthlyPayment.isZero()}
       <div class="metric-card">
         <h3>Average Payment</h3>
@@ -120,17 +137,33 @@
   .loan-overview {
   }
 
+  /* Row 1: Balance */
+  .balance-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem; /* Space below balance card */
+  }
+  .balance-row .metric-card.primary {
+    width: 100%; /* Allow card to take width */
+    max-width: 400px; /* But cap it */
+  }
+
+  /* Row 2: Primary Metrics */
   .primary-metrics {
     display: grid;
     gap: 1.5rem;
     margin-bottom: 2rem;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    /* Adjust minmax or use fixed columns if needed */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+    /* Removed align-items: start */
   }
 
+  /* Row 3: Secondary Metrics */
   .secondary-metrics {
     display: grid;
     gap: 1.5rem;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    /* Removed align-items: start */
   }
 
   .metric-card {

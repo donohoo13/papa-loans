@@ -59,12 +59,8 @@
     list-style: none;
     padding: 0;
     display: grid;
-    grid-template-columns: 1fr;
     gap: 1.5rem;
-
-    @media (min-width: 768px) {
-      grid-template-columns: repeat(2, 1fr);
-    }
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
 
   .transaction-card {
