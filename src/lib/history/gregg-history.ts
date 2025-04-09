@@ -35,6 +35,12 @@ const history: HistoryEntry[] = [
     amount: new Decimal(832),
     repayment: true,
   },
+  {
+    date: dayjs("03/31/2025"),
+    amount: new Decimal(832),
+    repayment: true,
+  },
+  
 ] as const;
 
 export const greggLoanDetails: LoanDetails = calculateLoan(history); 

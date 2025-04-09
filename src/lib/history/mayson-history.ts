@@ -25,6 +25,12 @@ const history: HistoryEntry[] = [
     amount: new Decimal(758.33),
     repayment: true,
   },
+  {
+    date: dayjs("04/01/2025"),
+    amount: new Decimal(758.33),
+    repayment: true,
+  },
+  
 ] as const;
 
 export const maysonLoanDetails: LoanDetails = calculateLoan(history); 
