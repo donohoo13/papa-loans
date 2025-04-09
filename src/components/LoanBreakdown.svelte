@@ -12,6 +12,11 @@
   let password = "";
   let accessAllowed = false;
 
+  // Extract repayment dates (as strings for easier comparison in chart)
+  $: repaymentDates = loanDetails.history
+    .filter(entry => entry.repayment)
+    .map(entry => entry.date.format('YYYY-MM-DD')); // Format consistently
+
   function handleAccess(e: SubmitEvent) {
     e.preventDefault();
     if (password.toLowerCase() === name.toLowerCase()) {
@@ -38,7 +43,11 @@
       </div>
       <div>
 
-        <HistoryChart dailyBalance={loanDetails.dailyBalance} key={name} />
+        <HistoryChart 
+          dailyBalance={loanDetails.dailyBalance} 
+          repaymentDates={repaymentDates} 
+          key={name} 
+        />
       </div>
       <div>
         <History history={loanDetails.history} />

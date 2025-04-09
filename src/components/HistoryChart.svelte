@@ -1,12 +1,12 @@
 <script lang="ts">
   import { Chart, type ChartConfiguration } from "chart.js/auto";
   import { afterUpdate, onDestroy, onMount } from "svelte";
-  import { COLORS } from "../lib/config/constants";
   import { formatCurrency } from "../lib/utils/currency";
   import { formatDate } from "../lib/utils/dates";
   import type { DailyBalance } from "../types";
 
   export let dailyBalance: DailyBalance[];
+  export let repaymentDates: string[] = [];
   export let key: string;
 
   let canvas: HTMLCanvasElement;
@@ -16,16 +16,38 @@
   const BRAND_COLOR = 'hsl(23, 72%, 17%)';
   const BRAND_COLOR_TRANSPARENT = 'hsl(23, 72%, 17%, 0.1)';
 
-  // Optimize data points for large datasets
-  function optimizeDataPoints(data: DailyBalance[]): DailyBalance[] {
+  // Memoize repayment dates set for faster lookups
+  $: repaymentDatesSet = new Set(repaymentDates);
+
+  // Optimize data points for large datasets, ensuring repayment dates are included
+  function optimizeDataPoints(data: DailyBalance[], datesToKeep: Set<string>): DailyBalance[] {
     if (data.length <= 50) return data;
 
-    // For larger datasets, sample points based on total length
-    const samplingRate = Math.ceil(data.length / 50);
-    return data.filter((_, index) => index % samplingRate === 0);
+    const optimized: DailyBalance[] = [];
+    const samplingRate = Math.ceil(data.length / 75);
+    const dataLength = data.length;
+
+    if (dataLength === 0) return [];
+
+    // Always include the first point
+    optimized.push(data[0]);
+
+    for (let i = 1; i < dataLength - 1; i++) {
+      const currentDateStr = data[i].date.format('YYYY-MM-DD');
+      if (datesToKeep.has(currentDateStr) || i % samplingRate === 0) {
+        optimized.push(data[i]);
+      }
+    }
+
+    // Always include the last point (if not already included)
+    if (dataLength > 1 && (!optimized.length || optimized[optimized.length - 1] !== data[dataLength - 1])) {
+      optimized.push(data[dataLength - 1]);
+    }
+
+    return optimized;
   }
 
-  $: filteredDailyBalance = optimizeDataPoints(dailyBalance);
+  $: filteredDailyBalance = optimizeDataPoints(dailyBalance, repaymentDatesSet);
 
   $: chartData = {
     labels: filteredDailyBalance.map(({ date }) => formatDate(date, "MMM D")),
@@ -41,15 +63,21 @@
         backgroundColor: BRAND_COLOR,
         tension: 0.2,
         pointRadius: (ctx: { dataIndex: number; dataset: { data: number[] } }) => {
-          // Show points only for start, end, and significant changes
           const index = ctx.dataIndex;
+          const pointDate = filteredDailyBalance[index]?.date;
+          if (!pointDate) return 0;
+
+          if (repaymentDatesSet.has(pointDate.format('YYYY-MM-DD'))) {
+            return 4;
+          }
+
           if (index === 0 || index === filteredDailyBalance.length - 1) return 4;
           
           const currentValue = ctx.dataset.data[index];
           const prevValue = ctx.dataset.data[index - 1];
           const change = Math.abs((currentValue - prevValue) / prevValue);
           
-          return change > 0.05 ? 4 : 0; // Show point if change > 5%
+          return change > 0.05 ? 4 : 0;
         },
       }
     ],

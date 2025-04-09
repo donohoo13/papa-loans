@@ -2,9 +2,9 @@ import dayjs from "dayjs";
 import Decimal from "decimal.js";
 import type { DailyBalance, HistoryEntry, LoanDetails } from "../../types";
 import {
-  DAYS_IN_YEAR,
-  INTEREST_RATE,
-  TODAY
+    DAYS_IN_YEAR,
+    INTEREST_RATE,
+    TODAY
 } from '../config/constants';
 import { compareDates } from '../utils/dates';
 
@@ -40,61 +40,107 @@ export function calculateLoan(history: HistoryEntry[]): LoanDetails {
 
   let totalInterestAccrued = new Decimal(0);
   let totalRepayments = new Decimal(0);
-  let currentBalance = sortedHistory[0].amount;
-  let accruedInterest = new Decimal(0);
-  let dailyBalance: DailyBalance[] = [{
+  let currentBalance = new Decimal(0);
+  let unpaidAccruedInterest = new Decimal(0);
+  let dailyBalance: DailyBalance[] = [];
+
+  const firstDate = sortedHistory[0].date;
+  let lastProcessedDate = firstDate.subtract(1, "day");
+
+  let historyIndex = 0;
+  while (historyIndex < sortedHistory.length && sortedHistory[historyIndex].date.isSame(firstDate, 'day')) {
+    const transaction = sortedHistory[historyIndex];
+    if (!transaction.repayment) {
+      currentBalance = currentBalance.plus(transaction.amount);
+    } else {
+      console.warn("Repayment transaction encountered on the first day:", transaction);
+    }
+    historyIndex++;
+  }
+
+  dailyBalance.push({
     balance: currentBalance,
     interestAdded: new Decimal(0),
-    date: sortedHistory[0].date,
-  }];
+    date: firstDate,
+  });
 
-  let currentDate = sortedHistory[0].date.add(1, "day");
+  let currentDate = firstDate.add(1, "day");
 
   while (currentDate.isBefore(TODAY) || currentDate.isSame(TODAY, 'day')) {
     const dailyInterest = currentBalance
       .times(INTEREST_RATE)
       .dividedBy(DAYS_IN_YEAR)
-      .toDecimalPlaces(6);
+      .toDecimalPlaces(10);
 
     totalInterestAccrued = totalInterestAccrued.plus(dailyInterest);
-    accruedInterest = accruedInterest.plus(dailyInterest);
-    currentBalance = currentBalance.plus(dailyInterest);
+    unpaidAccruedInterest = unpaidAccruedInterest.plus(dailyInterest);
 
-    const daysTransactions = sortedHistory.filter(entry => 
-      entry.date.isSame(currentDate, 'day')
-    );
-
-    for (const transaction of daysTransactions) {
+    while (historyIndex < sortedHistory.length && sortedHistory[historyIndex].date.isSame(currentDate, 'day')) {
+      const transaction = sortedHistory[historyIndex];
       if (transaction.repayment) {
-        let remainingPayment = transaction.amount;
-        
-        if (accruedInterest.greaterThan(0)) {
-          const interestPayment = Decimal.min(remainingPayment, accruedInterest);
-          accruedInterest = accruedInterest.minus(interestPayment);
-          remainingPayment = remainingPayment.minus(interestPayment);
-        }
-        
-        currentBalance = currentBalance.minus(remainingPayment);
-        totalRepayments = totalRepayments.plus(transaction.amount);
+        let paymentAmount = transaction.amount;
+        totalRepayments = totalRepayments.plus(paymentAmount);
+
+        const interestPaid = Decimal.min(paymentAmount, unpaidAccruedInterest);
+        unpaidAccruedInterest = unpaidAccruedInterest.minus(interestPaid);
+
+        const principalPaid = paymentAmount.minus(interestPaid);
+        currentBalance = currentBalance.minus(principalPaid);
+
       } else {
         currentBalance = currentBalance.plus(transaction.amount);
       }
+      historyIndex++;
+    }
+
+    currentBalance = currentBalance.plus(unpaidAccruedInterest);
+    const capitalizedInterest = unpaidAccruedInterest;
+    unpaidAccruedInterest = new Decimal(0);
+
+    if (currentBalance.isNegative()) {
+      console.warn(`Balance went negative on ${currentDate.format('YYYY-MM-DD')}, capping at 0. Original: ${currentBalance.toFixed(2)}`);
+      currentBalance = new Decimal(0);
     }
 
     dailyBalance.push({
       balance: currentBalance,
-      interestAdded: dailyInterest,
+      interestAdded: capitalizedInterest,
       date: currentDate,
     });
 
+    lastProcessedDate = currentDate;
     currentDate = currentDate.add(1, "day");
   }
 
+  const calculatedPrincipal = sortedHistory.reduce((sum, entry) => {
+    return entry.repayment ? sum : sum.plus(entry.amount);
+  }, new Decimal(0));
+
+  const expectedBalance = calculatedPrincipal
+    .plus(totalInterestAccrued)
+    .minus(totalRepayments);
+
+  const tolerance = new Decimal(0.01);
+  const difference = currentBalance.minus(expectedBalance).abs();
+
+  if (difference.greaterThan(tolerance)) {
+    console.error("Loan Calculation Consistency Check Failed!");
+    console.error(`  Current Balance (Loop):  ${currentBalance.toFixed(4)}`);
+    console.error(`  Expected Balance (P+I-R): ${expectedBalance.toFixed(4)}`);
+    console.error(`  Difference:               ${difference.toFixed(4)}`);
+    console.error(`  Tolerance:                ${tolerance.toFixed(4)}`);
+    console.error(`  Total Principal Borrowed: ${calculatedPrincipal.toFixed(4)}`);
+    console.error(`  Total Interest Accrued:   ${totalInterestAccrued.toFixed(4)}`);
+    console.error(`  Total Repayments:         ${totalRepayments.toFixed(4)}`);
+  }
+
+  const finalCurrentBalance = currentBalance.toDecimalPlaces(2);
+
   return {
     history: sortedHistory,
-    totalInterestAccrued,
-    totalRepayments,
-    currentBalance,
-    dailyBalance,
+    totalInterestAccrued: totalInterestAccrued.toDecimalPlaces(2),
+    totalRepayments: totalRepayments.toDecimalPlaces(2),
+    currentBalance: finalCurrentBalance,
+    dailyBalance: dailyBalance.map(d => ({ ...d, balance: d.balance.toDecimalPlaces(2) })),
   };
 }

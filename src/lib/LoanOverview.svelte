@@ -5,7 +5,7 @@
 
   export let loanDetails: LoanDetails;
 
-  const currencyFormatter = new Intl.NumberFormat('en-US', {
+  const currencyFormatter = new Intl.NumberFormat('en-US', { 
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 2,
@@ -24,8 +24,6 @@
     .filter(entry => !entry.repayment)
     .reduce((sum, entry) => sum.plus(entry.amount), new Decimal(0));
 
-  $: currentInterest = loanDetails.currentBalance.minus(totalPrincipal);
-  
   $: monthlyInterest = loanDetails.currentBalance
     .times(INTEREST_RATE)
     .dividedBy(12)
@@ -35,18 +33,20 @@
     ? new Decimal(0)
     : loanDetails.totalInterestAccrued
         .dividedBy(loanDetails.totalRepayments)
-        .times(1)
         .toDecimalPlaces(3);
 
   $: averageMonthlyPayment = (() => {
     if (loanDetails.history.length <= 1) return new Decimal(0);
     const firstDate = loanDetails.history[0].date;
-    const lastDate = loanDetails.history[loanDetails.history.length - 1].date;
-    const monthsDiff = lastDate.diff(firstDate, 'month', true);
+    const monthsDiff = loanDetails.history[loanDetails.history.length - 1].date.diff(firstDate, 'month', true);
     return monthsDiff <= 0 
       ? new Decimal(0)
       : loanDetails.totalRepayments.dividedBy(monthsDiff).toDecimalPlaces(2);
   })();
+
+  $: shouldShowCapitalizationNote = 
+    loanDetails.currentBalance.greaterThan(totalPrincipal) && 
+    loanDetails.totalRepayments.greaterThan(0);
 </script>
 
 <section class="loan-overview">
@@ -55,6 +55,11 @@
     <div class="metric-card primary">
       <h3>Current Balance</h3>
       <p class="amount">{formatCurrency(loanDetails.currentBalance)}</p>
+      {#if shouldShowCapitalizationNote}
+        <p class="info-subtle">
+          Note: The balance can increase if payments made do not fully cover the interest accrued in a period (interest capitalization).
+        </p>
+      {/if}
     </div>
     
     <div class="metric-card">
@@ -76,7 +81,7 @@
     </div>
 
     <div class="metric-card">
-      <h3>Monthly Interest</h3>
+      <h3>Est. Current Monthly Interest</h3>
       <p class="amount">
         {formatCurrency(monthlyInterest)}
         <span class="suffix">/month</span>
@@ -84,7 +89,15 @@
     </div>
 
     <div class="metric-card">
-      <h3>Interest/Payment Ratio</h3>
+      <h3>
+        Interest/Payment Ratio
+        <span 
+          class="info-icon" 
+          title="Shows the ratio of total accrued interest to total payments made. A value over 100% indicates that accumulated interest has historically exceeded payments."
+        >
+          ℹ️
+        </span>
+      </h3>
       <p class="amount">
         {percentFormatter.format(interestToPaymentRatio.toNumber())}
         <span class="suffix">of payments to interest</span>
@@ -186,6 +199,22 @@
 
   .subtle-green {
     color: hsl(120 30% 60%);
+  }
+
+  .info-icon {
+    font-size: 1.2rem;
+    margin-left: 0.5em;
+    cursor: help;
+    vertical-align: middle;
+    opacity: 0.7;
+  }
+
+  .info-subtle {
+    font-size: 1.2rem;
+    color: var(--clr-muted);
+    margin-top: 1rem;
+    font-style: italic;
+    opacity: 0.9;
   }
 
   @media (max-width: 768px) {
