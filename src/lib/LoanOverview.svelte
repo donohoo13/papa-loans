@@ -66,13 +66,13 @@
   <!-- Row 2: Core Metrics (Interest & Repayments) -->
   <div class="primary-metrics">
     <!-- Total Interest Accrued -->
-    <div class="metric-card">
+    <div class="metric-card centered">
       <h3>Total Interest Accrued</h3>
       <p class="amount subtle-red">{formatCurrency(loanDetails.totalInterestAccrued)}</p>
     </div>
     
     <!-- Total Repayments -->
-    <div class="metric-card">
+    <div class="metric-card centered">
       <h3>Total Repayments</h3>
       <p class="amount subtle-green">{formatCurrency(loanDetails.totalRepayments)}</p>
     </div>
@@ -154,8 +154,13 @@
     gap: 1.5rem;
     margin-bottom: 2rem;
     /* Adjust minmax or use fixed columns if needed */
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
     /* Removed align-items: start */
+  }
+
+  .metric-card.centered {
+    text-align: center;
+    padding-block: 3rem;
   }
 
   /* Row 3: Secondary Metrics */
