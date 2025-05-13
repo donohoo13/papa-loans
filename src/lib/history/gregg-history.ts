@@ -3,7 +3,6 @@ import Decimal from "decimal.js";
 import { calculateLoan } from ".";
 import type { HistoryEntry, LoanDetails } from "../../types";
 
-
 const history: HistoryEntry[] = [
   {
     date: dayjs("10/01/2024"),
@@ -40,7 +39,11 @@ const history: HistoryEntry[] = [
     amount: new Decimal(832),
     repayment: true,
   },
-  
+  {
+    date: dayjs("05/01/2025"),
+    amount: new Decimal(832),
+    repayment: true,
+  },
 ] as const;
 
-export const greggLoanDetails: LoanDetails = calculateLoan(history); 
+export const greggLoanDetails: LoanDetails = calculateLoan(history);

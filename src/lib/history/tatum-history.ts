@@ -3,7 +3,6 @@ import Decimal from "decimal.js";
 import { calculateLoan } from ".";
 import type { DailyBalance, HistoryEntry, LoanDetails } from "../../types";
 
-
 const history: HistoryEntry[] = [
   {
     date: dayjs("10/10/2024"),
@@ -30,6 +29,11 @@ const history: HistoryEntry[] = [
     amount: new Decimal(752.54),
     repayment: true,
   },
+  {
+    date: dayjs("04/16/2025"),
+    amount: new Decimal(740.3),
+    repayment: true,
+  },
 ] as const;
 
-export const tatumLoanDetails: LoanDetails = calculateLoan(history); 
+export const tatumLoanDetails: LoanDetails = calculateLoan(history);
