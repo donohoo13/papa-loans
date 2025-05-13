@@ -1,3 +1,4 @@
+
 <script lang="ts">
   import dayjs from "dayjs";
   import PapaLoans from "./assets/papa_loans_t.webp";
@@ -47,12 +48,6 @@
       <LoanBreakdown loanDetails={tatumLoanDetails} name="Tatum" />
     {/if}
   </Tabs>
-
-  <!-- <Totals />
-
-  <History />
-
-  <HistoryChart /> -->
 </main>
 
 <style>
@@ -78,3 +73,4 @@
     }
   }
 </style>
+    

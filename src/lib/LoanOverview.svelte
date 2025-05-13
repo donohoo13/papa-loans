@@ -1,3 +1,4 @@
+
 <script lang="ts">
   import Decimal from "decimal.js";
   import { INTEREST_RATE } from "../lib/config/constants";
@@ -255,7 +256,7 @@
     opacity: 0.9;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: calc(var(--bkpt-tablet))) {
     .metric-card {
       padding: 1.5rem;
     }
@@ -273,3 +274,4 @@
     }
   }
 </style> 
+    

@@ -1,3 +1,4 @@
+
 :root {
   --clr-text: hsl(23 100% 98%);
   --clr-bg: hsl(23 10% 4%);
@@ -7,7 +8,7 @@
   --clr-surface-hover: hsl(23 12% 13%);
   --clr-muted: hsl(23 30% 80%);
   --bkpt-mobile: 600px;
-  --bkpt-tablet: 900px;
+  --bkpt-tablet: 768px; /* Adjusted from 900px to 768px */
   --bkpt-laptop: 1200px;
   --bkpt-desktop: 1800px;
 
@@ -53,3 +54,4 @@ body {
   margin: 0 auto;
   padding: 2rem;
 }
+    

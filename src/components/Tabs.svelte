@@ -1,3 +1,4 @@
+
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
   import type { ContentTab } from "../types";
@@ -134,10 +135,11 @@
     border-radius: 1rem; */
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: calc(var(--bkpt-tablet))) {
     [role="tab"] {
       padding: 1rem 1.8rem;
       font-size: 1.3rem;
     }
   }
 </style>
+    
