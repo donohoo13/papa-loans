@@ -29,6 +29,11 @@ const history: HistoryEntry[] = [
     amount: new Decimal(2_000),
     repayment: true,
   },
+  {
+    date: dayjs("05/31/2025"),
+    amount: new Decimal(120.87),
+    repayment: true,
+  },
 ] as const;
 
 export const connerLoanDetails: LoanDetails = calculateLoan(history);
