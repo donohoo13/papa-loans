@@ -44,6 +44,11 @@ const history: HistoryEntry[] = [
     amount: new Decimal(981),
     repayment: true,
   },
+  {
+    date: dayjs("05/31/2025"),
+    amount: new Decimal(931),
+    repayment: true,
+  },
 ] as const;
 
 export const erikLoanDetails: LoanDetails = calculateLoan(history);
