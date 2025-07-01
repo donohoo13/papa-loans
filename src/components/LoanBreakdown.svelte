@@ -1,10 +1,10 @@
-
 <script lang="ts">
   import { onMount } from "svelte";
   import History from "../lib/History.svelte";
   import LoanOverview from "../lib/LoanOverview.svelte";
   import type { LoanDetails } from "../types";
   import HistoryChart from "./HistoryChart.svelte";
+ 
 
   export let loanDetails: LoanDetails;
   export let name: string;
@@ -43,11 +43,10 @@
         <LoanOverview {loanDetails} />
       </div>
       <div>
-
+        <!-- The key prop is no longer needed as the chart now updates itself internally -->
         <HistoryChart 
           dailyBalance={loanDetails.dailyBalance} 
-          repaymentDates={repaymentDates} 
-          key={name} 
+          repaymentDates={repaymentDates}
         />
       </div>
       <div>
@@ -154,4 +153,3 @@
     background-color: hsl(23, 72%, 22%); /* Slightly darker shade of primary */
   }
 </style>
-    

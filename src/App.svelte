@@ -1,24 +1,32 @@
-
 <script lang="ts">
   import dayjs from "dayjs";
   import PapaLoans from "./assets/papa_loans_t.webp";
-  import Tabs from "./components/Tabs.svelte";
-  import type { ContentTab } from "./types";
   import LoanBreakdown from "./components/LoanBreakdown.svelte";
+  import Tabs from "./components/Tabs.svelte";
   import { connerLoanDetails } from "./lib/history/conner-history";
-  import { tatumLoanDetails } from "./lib/history/tatum-history";
-  import { greggLoanDetails } from "./lib/history/gregg-history";
   import { erikLoanDetails } from "./lib/history/erik-history";
+  import { greggLoanDetails } from "./lib/history/gregg-history";
   import { maysonLoanDetails } from "./lib/history/mayson-history";
+  import { tatumLoanDetails } from "./lib/history/tatum-history";
+  import type { ContentTab, LoanDetails } from "./types";
 
-  const tabs: ContentTab[] = [
-    { index: 0, label: "Mayson" },
-    { index: 1, label: "Conner" },
-    { index: 2, label: "Gregg" },
-    { index: 3, label: "Erik" },
-    { index: 4, label: "Tatum" },
+  // A single, data-driven array to manage all loan information.
+  // This makes adding, removing, or reordering loans trivial.
+  const loans: { name: string; details: LoanDetails }[] = [
+    { name: "Mayson", details: maysonLoanDetails },
+    { name: "Conner", details: connerLoanDetails },
+    { name: "Gregg", details: greggLoanDetails },
+    { name: "Erik", details: erikLoanDetails },
+    { name: "Tatum", details: tatumLoanDetails },
   ];
 
+  // Derive the tabs directly from the loans array.
+  const tabs: ContentTab[] = loans.map((loan, index) => ({
+    index: index,
+    label: loan.name,
+  }));
+
+  let activeTab = 0;
   let currentDateTime = dayjs();
 </script>
 
@@ -29,24 +37,15 @@
     <time datetime={currentDateTime.format("YYYY-MM-DD")}
       >{currentDateTime.format("MMMM D, YYYY")}</time
     >
-    <!-- <p>
-      Loan interest breakdown (amortization schedule) for VW Westfalia Camper
-      van.
-    </p> -->
   </header>
 
-  <Tabs {tabs} let:tabIndex>
-    {#if tabIndex === 0}
-      <LoanBreakdown loanDetails={maysonLoanDetails} name="Mayson" />
-    {:else if tabIndex === 1}
-      <LoanBreakdown loanDetails={connerLoanDetails} name="Conner" />
-    {:else if tabIndex === 2}
-      <LoanBreakdown loanDetails={greggLoanDetails} name="Gregg" />
-    {:else if tabIndex === 3}
-      <LoanBreakdown loanDetails={erikLoanDetails} name="Erik" />
-    {:else if tabIndex === 4}
-      <LoanBreakdown loanDetails={tatumLoanDetails} name="Tatum" />
-    {/if}
+  <!-- The Tabs component now controls a single LoanBreakdown instance -->
+  <!-- which is dynamically updated, improving maintainability and performance. -->
+  <Tabs {tabs} bind:activeTab>
+    <LoanBreakdown
+      loanDetails={loans[activeTab].details}
+      name={loans[activeTab].name}
+    />
   </Tabs>
 </main>
 
@@ -73,4 +72,3 @@
     }
   }
 </style>
-    

@@ -7,7 +7,7 @@ const history: HistoryEntry[] = [
   {
     date: dayjs("10/18/2024"),
     amount: new Decimal(110_616),
-    repayment: false,
+    repayment: false, 
   },
   {
     date: dayjs("10/31/2024"),
@@ -47,6 +47,11 @@ const history: HistoryEntry[] = [
   {
     date: dayjs("05/31/2025"),
     amount: new Decimal(931),
+    repayment: true,
+  },
+  {
+    date: dayjs("06/30/2025"),
+    amount: new Decimal(980),
     repayment: true,
   },
 ] as const;

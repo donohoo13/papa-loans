@@ -2,7 +2,9 @@ import dayjs from 'dayjs';
 
 export const INTEREST_RATE = 0.05;
 export const DAYS_IN_YEAR = 365;
-export const TODAY = dayjs();
+// Set a fixed date for 'TODAY' to ensure calculations are consistent regardless of when the app is viewed.
+// This is set to the date we agreed upon for projecting loan balances. 
+export const TODAY = dayjs("2025-07-01");
 
 export const DATE_FORMATS = {
   DISPLAY: "MMMM D, YYYY",

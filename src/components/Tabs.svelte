@@ -1,12 +1,12 @@
-
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
+  import { afterUpdate, createEventDispatcher } from "svelte";
   import type { ContentTab } from "../types";
 
   export let tabs: ContentTab[] = [];
   export let activeTab = 0;
 
   const dispatch = createEventDispatcher();
+  let tabButtons: (HTMLButtonElement | null)[] = [];
 
   function selectTab(index: number) {
     if (activeTab === index) return;
@@ -14,23 +14,34 @@
     dispatch("tabChange", { selectedTab: index });
   }
 
+  // Focus the newly selected tab button for better keyboard navigation.
+  afterUpdate(() => {
+    tabButtons[activeTab]?.focus();
+  });
+
   function handleKeydown(event: KeyboardEvent, index: number) {
     const lastIndex = tabs.length - 1;
+    let newIndex = index;
     
     switch (event.key) {
       case "ArrowLeft":
-        selectTab(index === 0 ? lastIndex : index - 1);
+        newIndex = index === 0 ? lastIndex : index - 1; 
         break;
       case "ArrowRight": 
-        selectTab(index === lastIndex ? 0 : index + 1);
+        newIndex = index === lastIndex ? 0 : index + 1;
         break;
       case "Home":
-        selectTab(0);
+        newIndex = 0;
         break;
       case "End":
-        selectTab(lastIndex);
+        newIndex = lastIndex;
         break;
+      default:
+        return; // Do nothing if the key is not one of the handled ones.
     }
+
+    event.preventDefault(); // Prevent scrolling on arrow key press
+    selectTab(newIndex);
   }
 </script>
 
@@ -38,9 +49,10 @@
   <div role="tablist" aria-label="Content tabs">
     {#each tabs as tab (tab.index)}
       <button
+        bind:this={tabButtons[tab.index]}
         role="tab"
         aria-selected={activeTab === tab.index}
-        aria-controls="panel-{tab.index}"
+        aria-controls="tab-panel"
         id="tab-{tab.index}"
         tabindex={activeTab === tab.index ? 0 : -1}
         on:click={() => selectTab(tab.index)}
@@ -51,18 +63,15 @@
     {/each}
   </div>
 
-  {#each tabs as tab (tab.index)}
-    <div
-      role="tabpanel"
-      id="panel-{tab.index}"
-      aria-labelledby="tab-{tab.index}"
-      hidden={activeTab !== tab.index}
-    >
-      <slot {activeTab} tabIndex={tab.index}>
-        <p>No content provided for tab {tab.index + 1}</p>
-      </slot>
-    </div>
-  {/each}
+  <!-- A single tabpanel is now used, rendering only the content for the active tab. -->
+  <!-- This is more efficient than rendering all panels and hiding them. -->
+  <div
+    role="tabpanel"
+    id="tab-panel"
+    aria-labelledby="tab-{activeTab}"
+  >
+    <slot />
+  </div>
 </div>
 
 <style>
@@ -96,23 +105,24 @@
     scroll-snap-align: start;
     scroll-snap-stop: always;
     position: relative;
+    white-space: nowrap; /* Prevent tab labels from wrapping */
   }
 
   [role="tab"]::after {
     content: '';
     position: absolute;
-    bottom: 0;
+    bottom: -2px; /* Position on top of the border-bottom */
     left: 0;
     width: 100%;
     height: 2px;
     background-color: var(--clr-primary);
     transform: scaleX(0);
-    transition: transform 0.2s ease;
+    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
   }
 
-  [role="tab"]:focus {
-    outline: none;
-    background-color: var(--clr-surface-hover);
+  [role="tab"]:focus-visible {
+    outline: 2px solid var(--clr-secondary);
+    outline-offset: 2px;
   }
 
   [role="tab"]:hover {
@@ -130,9 +140,7 @@
   }
 
   [role="tabpanel"] {
-    padding: 2rem;
-    /* background-color: var(--clr-surface);
-    border-radius: 1rem; */
+    padding-inline: 0; /* Let content inside handle its own padding */
   }
 
   @media (max-width: calc(var(--bkpt-tablet))) {
@@ -142,4 +150,3 @@
     }
   }
 </style>
-    

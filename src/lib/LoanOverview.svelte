@@ -1,14 +1,13 @@
-
 <script lang="ts">
   import Decimal from "decimal.js";
-  import { INTEREST_RATE } from "../lib/config/constants";
+  import { DAYS_IN_YEAR, INTEREST_RATE } from "../lib/config/constants";
   import type { LoanDetails } from "../types";
 
   export let loanDetails: LoanDetails;
 
   const currencyFormatter = new Intl.NumberFormat('en-US', { 
     style: 'currency',
-    currency: 'USD',
+    currency: 'USD', 
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   });
@@ -28,6 +27,12 @@
   $: monthlyInterest = loanDetails.currentBalance
     .times(INTEREST_RATE)
     .dividedBy(12)
+    .toDecimalPlaces(2);
+
+  // Calculate the estimated daily interest.
+  $: dailyInterest = loanDetails.currentBalance
+    .times(INTEREST_RATE)
+    .dividedBy(DAYS_IN_YEAR)
     .toDecimalPlaces(2);
 
   $: interestToPaymentRatio = loanDetails.totalRepayments.isZero() 
@@ -77,14 +82,6 @@
       <h3>Total Repayments</h3>
       <p class="amount subtle-green">{formatCurrency(loanDetails.totalRepayments)}</p>
     </div>
-    
-    <!-- Principal Borrowed (Moved down) -->
-    <!-- 
-    <div class="metric-card">
-      <h3>Principal Borrowed</h3>
-      <p class="amount">{formatCurrency(totalPrincipal)}</p>
-    </div> 
-    -->
   </div>
 
   <!-- Row 3: Secondary Metrics (Including Principal) -->
@@ -95,13 +92,19 @@
       <p class="amount">{formatCurrency(totalPrincipal)}</p>
     </div>
     
-    <!-- Est. Current Monthly Interest -->
+    <!-- Est. Current Monthly & Daily Interest -->
     <div class="metric-card">
-      <h3>Est. Current Monthly Interest</h3>
-      <p class="amount">
-        {formatCurrency(monthlyInterest)}
-        <span class="suffix">/month</span>
-      </p>
+      <h3>Est. Current Interest</h3>
+      <div class="interest-breakdown">
+        <p class="amount">
+          {formatCurrency(monthlyInterest)}
+          <span class="suffix">/month</span>
+        </p>
+        <p class="amount-sub">
+          {formatCurrency(dailyInterest)}
+          <span class="suffix">/day</span>
+        </p>
+      </div>
     </div>
 
     <!-- Interest/Payment Ratio -->
@@ -154,9 +157,7 @@
     display: grid;
     gap: 1.5rem;
     margin-bottom: 2rem;
-    /* Adjust minmax or use fixed columns if needed */
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-    /* Removed align-items: start */
   }
 
   .metric-card.centered {
@@ -169,7 +170,6 @@
     display: grid;
     gap: 1.5rem;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    /* Removed align-items: start */
   }
 
   .metric-card {
@@ -220,6 +220,18 @@
     margin: 0;
     line-height: 1.2;
     color: var(--clr-text);
+  }
+  
+  .amount-sub {
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: var(--clr-muted);
+    margin-top: 0.8rem;
+    line-height: 1.2;
+  }
+
+  .amount-sub .suffix {
+    font-size: 1.2rem;
   }
 
   .primary .amount {
@@ -273,5 +285,4 @@
       font-size: 1.3rem;
     }
   }
-</style> 
-    
+</style>

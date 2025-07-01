@@ -1,95 +1,74 @@
 <script lang="ts">
   import { Chart, type ChartConfiguration } from "chart.js/auto";
-  import { afterUpdate, onDestroy, onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import { formatCurrency } from "../lib/utils/currency";
   import { formatDate } from "../lib/utils/dates";
   import type { DailyBalance } from "../types";
 
   export let dailyBalance: DailyBalance[];
   export let repaymentDates: string[] = [];
-  export let key: string;
 
   let canvas: HTMLCanvasElement;
   let chart: Chart;
 
-  // Add brand color constant
   const BRAND_COLOR = "hsl(23, 72%, 17%)";
   const BRAND_COLOR_TRANSPARENT = "hsl(23, 72%, 17%, 0.1)";
 
   // Memoize repayment dates set for faster lookups
   $: repaymentDatesSet = new Set(repaymentDates);
-
-  // Optimize data points for large datasets, ensuring repayment dates are included
-  function optimizeDataPoints(
-    data: DailyBalance[],
-    datesToKeep: Set<string>
-  ): DailyBalance[] {
-    if (data.length <= 50) return data;
+  
+  // The dailyBalance data is now much sparser thanks to the new calculation engine.
+  // This optimization function is kept for robustness in case of very frequent transactions.
+  function optimizeDataPoints(data: DailyBalance[]): DailyBalance[] {
+    if (data.length <= 150) return data; // Increased threshold
 
     const optimized: DailyBalance[] = [];
-    const samplingRate = Math.ceil(data.length / 75);
-    const dataLength = data.length;
+    // Sample down to ~100 points for very large datasets
+    const samplingRate = Math.ceil(data.length / 100); 
 
-    if (dataLength === 0) return [];
-
-    // Always include the first point
+    if (data.length === 0) return [];
     optimized.push(data[0]);
 
-    for (let i = 1; i < dataLength - 1; i++) {
-      const currentDateStr = data[i].date.format("YYYY-MM-DD");
-      if (datesToKeep.has(currentDateStr) || i % samplingRate === 0) {
+    for (let i = 1; i < data.length - 1; i++) {
+      if (i % samplingRate === 0) {
         optimized.push(data[i]);
       }
     }
-
-    // Always include the last point (if not already included)
-    if (
-      dataLength > 1 &&
-      (!optimized.length ||
-        optimized[optimized.length - 1] !== data[dataLength - 1])
-    ) {
-      optimized.push(data[dataLength - 1]);
-    }
-
+    optimized.push(data[data.length - 1]);
     return optimized;
   }
 
-  $: filteredDailyBalance = optimizeDataPoints(dailyBalance, repaymentDatesSet);
+  $: chartPoints = optimizeDataPoints(dailyBalance);
 
   $: chartData = {
-    labels: filteredDailyBalance.map(({ date }) => formatDate(date, "MMM D")),
+    labels: chartPoints.map(({ date }) => formatDate(date, "MMM D, YY")),
     datasets: [
       {
         label: "Balance",
-        data: filteredDailyBalance.map((db) => +db.balance.toDecimalPlaces(2)),
+        data: chartPoints.map((db) => +db.balance.toDecimalPlaces(2)),
         fill: {
           target: "origin",
           above: BRAND_COLOR_TRANSPARENT,
         },
         borderColor: BRAND_COLOR,
         backgroundColor: BRAND_COLOR,
-        tension: 0.2,
-        pointRadius: (ctx: {
-          dataIndex: number;
-          dataset: { data: number[] };
-        }) => {
+        tension: 0.1,
+        pointRadius: (ctx: { dataIndex: number }) => {
           const index = ctx.dataIndex;
-          const pointDate = filteredDailyBalance[index]?.date;
+          const pointDate = chartPoints[index]?.date;
           if (!pointDate) return 0;
 
+          // Highlight points that are on a repayment date
           if (repaymentDatesSet.has(pointDate.format("YYYY-MM-DD"))) {
             return 4;
           }
 
-          if (index === 0 || index === filteredDailyBalance.length - 1)
-            return 4;
+          // Always show first and last points
+          if (index === 0 || index === chartPoints.length - 1) return 3;
 
-          const currentValue = ctx.dataset.data[index];
-          const prevValue = ctx.dataset.data[index - 1];
-          const change = Math.abs((currentValue - prevValue) / prevValue);
-
-          return change > 0.05 ? 4 : 0;
+          return 0; // Hide intermediate points for a cleaner line
         },
+        pointHoverRadius: 6,
       },
     ],
   };
@@ -101,8 +80,8 @@
       responsive: true,
       maintainAspectRatio: false,
       animation: {
-        duration: 750,
-        easing: "easeInOutQuart",
+        duration: 500, // Slightly faster animation
+        easing: "easeOutCubic",
       },
       interaction: {
         intersect: false,
@@ -142,61 +121,43 @@
       },
       scales: {
         x: {
-          grid: {
-            display: false,
-          },
-          border: {
-            display: false,
-          },
+          grid: { display: false },
+          border: { display: false },
           ticks: {
-            maxTicksLimit: 12,
+            maxTicksLimit: 10,
             maxRotation: 45,
             minRotation: 45,
             color: "hsl(23 30% 80%)",
-            font: {
-              size: 12,
-              family: "'Inter', system-ui, sans-serif",
-            },
           },
         },
         y: {
           beginAtZero: false,
-          border: {
-            display: false,
-          },
+          border: { display: false },
           ticks: {
             callback: (value: number) => formatCurrency(value),
             color: "hsl(23 30% 80%)",
-            font: {
-              size: 12,
-              family: "'Inter', system-ui, sans-serif",
-            },
           },
-          grid: {
-            color: "hsl(23 12% 13%)",
-            lineWidth: 1,
-          },
+          grid: { color: "hsl(23 12% 13%)" },
         },
       },
     },
   } as ChartConfiguration;
 
-  function initChart() {
+  // This reactive statement efficiently updates the chart when its config changes,
+  // avoiding the costly process of destroying and recreating the chart instance.
+  $: if (chart && chartConfig) {
+    chart.data = chartConfig.data;
+    chart.options = chartConfig.options as any; // Type assertion to satisfy Chart.js types
+    chart.update('none'); // 'none' prevents animation on data swap for a smoother feel
+  }
+
+  onMount(() => {
     if (canvas) {
-      chart?.destroy();
       const ctx = canvas.getContext("2d");
       if (ctx) {
         chart = new Chart(ctx, chartConfig);
       }
     }
-  }
-
-  onMount(() => {
-    initChart();
-  });
-
-  afterUpdate(() => {
-    initChart();
   });
 
   onDestroy(() => {
@@ -209,9 +170,7 @@
     bind:this={canvas}
     role="img"
     aria-label="Loan balance trend chart"
-    id="chart-{key}"
   />
-  <div class="chart-summary" aria-live="polite"></div>
 </div>
 
 <style lang="css">
@@ -225,16 +184,10 @@
     background-color: var(--clr-surface);
     border-radius: 1.2rem;
     transition: background-color 0.2s ease;
-  }
+  } 
 
   .chart-card:hover {
     background-color: var(--clr-surface-hover);
-  }
-
-  .chart-summary {
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 1px solid hsla(23, 30%, 80%, 0.1);
   }
 
   @media (max-width: calc(var(--bkpt-tablet))) {
